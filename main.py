@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: Stefan Bucher (web@stefan-bucher.ch), 2021
+"""
+
+import numpy as np
+import scipy.special
+import math
+import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
+from matplotlib import cm
+from matplotlib.widgets import Slider
+import matplotlib.ticker as ticker
+
+from pdfs import *
+from plotFunctions import *
+
+resolution = 0.01 
+lowres = 0.1
+betas = [ 1, 2, 3, 5]
+fileFormat = '.png' #jpg or png seem to give better results than pdf, svg
+cmap = 'binary' # colormap ('gray': white for high values; 'binary': black for high values)
+vmin = 0 # ensure that white in 'binary' color map corresponds to pdf=0.
+vmax = None # chosen automatically based on data
+
+# Mesh grids of different size for different purposes
+x1_full, x2_full = np.meshgrid(np.arange(0,100,resolution),np.arange(0,100,resolution))
+x1_divnorm, x2_divnorm = np.meshgrid(np.arange(0,3.01,resolution),np.arange(0,3.01,resolution))
+y1, y2 = np.meshgrid(np.arange(0,1.01,resolution),np.arange(0,1.01,resolution))
+x1_cond, x2_cond =  np.meshgrid(np.arange(0,10.01,resolution),np.arange(0,10.01,resolution)) # could do negative values for bow-tie plot but pdf is 0
+
+x1_bowtie, x2_bowtie =  np.meshgrid(np.arange(-10.11,10.11,lowres),np.arange(-10.11,10.11,lowres))
+x1_fullbowtie, x2_fullbowtie = np.meshgrid(np.arange(-100,100,lowres),np.arange(-100,100,lowres))
+
+
+#########################################
+# Plotting Input Distributions
+#########################################
+for beta in betas:
+    if beta<=1:
+        x1_trunc, x2_trunc = np.meshgrid(np.arange(0,1.01,resolution),np.arange(0,1.01,resolution))
+        zlim = 3
+    else:
+        x1_trunc, x2_trunc = np.meshgrid(np.arange(0,3.01,resolution),np.arange(0,3.01,resolution))
+        zlim = 1
+
+    ## Pareto distribution
+    plotJointDensity(x1_trunc, x2_trunc, bivariatePareto_pdf(x1_full, x2_full, sigma1=1, sigma2=1, beta=beta), xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$',cmap=cmap, vmin=vmin, vmax=vmax, fname='Pareto_pdf_beta'+str(beta)+fileFormat)
+
+    plot3D(x2_trunc, x1_trunc, bivariatePareto_pdf(x2_full, x1_full, sigma1=1, sigma2=1, beta=beta), 
+           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='Pareto_pdf_beta'+str(beta)+'_3D'+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
+    
+    ## Input under constant costs (just as a sanity check - should be identical to Pareto_pdf)
+    plotJointDensity(x1_trunc, x2_trunc, input_pdf_from_output_pdf(x1_full, x2_full, gamma=1, b=1, beta=beta, lambda1=1, lambda2=1, output_pdf=bivariateUniform_pdf), 
+           xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$',cmap=cmap, vmin=vmin, vmax=vmax, fname='input_pdf_constantCost_beta'+str(beta)+fileFormat)
+
+    plot3D(x2_trunc, x1_trunc, input_pdf_from_output_pdf(x2_full, x1_full, gamma=1, b=1, beta=beta, lambda1=1, lambda2=1, output_pdf=bivariateUniform_pdf), 
+           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='input_pdf_constantCost_beta'+str(beta)+'_3D'+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
+    
+    ## Input under linear costs
+    plotJointDensity(x1_trunc, x2_trunc, input_pdf_from_output_pdf(x1_full, x2_full, gamma=1, b=1, beta=beta, lambda1=1, lambda2=1, output_pdf=bivariateTruncatedExponential_pdf),
+           xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$',cmap=cmap, vmin=vmin, vmax=vmax, fname='input_pdf_linearCost_beta'+str(beta)+fileFormat)
+    
+    plot3D(x2_trunc, x1_trunc, input_pdf_from_output_pdf(x2_full, x1_full, gamma=1, b=1, beta=beta, lambda1=1, lambda2=1, output_pdf=bivariateTruncatedExponential_pdf), 
+           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='input_pdf_linearCost_beta'+str(beta)+'_3D'+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
+
+
+#########################################
+# Plotting Divisve Normalization Function
+#########################################
+for beta in betas:
+    plot3D(x2_divnorm, x1_divnorm, r_i(x_i=x1_divnorm, x_j=x2_divnorm, gamma=1, b=1, beta=beta, lambda_i=1, lambda_j=1),
+           xlabel='$x_j$', ylabel='$x_i$', zlabel='$r_i(x_i,x_j)$', fname='divNorm_fnct_beta' + str(beta) + fileFormat,
+           contourProjections=False, zlim=1, zlimlabel='$\gamma$', elev=22, azim=13)
+
+
+#########################################
+# Plotting Output Distributions
+#########################################
+
+## Truncated Uniform
+plotJointDensity(y1, y2, bivariateUniform_pdf(y1, y2, gamma=1), xlabel='$y_1$', ylabel='$y_2$', xlimlabel='$\gamma$', ylimlabel='$\gamma$',cmap=cmap, vmin=vmin, vmax=vmax, fname='truncatedUniform_pdf'+fileFormat)
+    
+plot3D(y2, y1, bivariateUniform_pdf(y2, y1, gamma=1),
+       xlabel='$y_2$', ylabel='$y_1$',zlabel=None, fname='truncatedUniform_pdf'+'_3D'+fileFormat, show_pdf=False, contourProjections=True, zlim=5, xlimlabel='$\gamma$', ylimlabel='$\gamma$')
+
+## Truncated Exponential
+plotJointDensity(y1, y2, bivariateTruncatedExponential_pdf(y1, y2, gamma=1), xlabel='$y_1$', ylabel='$y_2$', xlimlabel='$\gamma$', ylimlabel='$\gamma$',cmap=cmap, vmin=vmin, vmax=vmax, fname='truncatedExponential_pdf'+fileFormat)
+
+plot3D(y2, y1, bivariateTruncatedExponential_pdf(y2,y1,gamma=1), 
+       xlabel='$y_2$', ylabel='$y_1$',zlabel=None, fname='truncatedExponential_pdf'+'_3D'+fileFormat, show_pdf=False, contourProjections=True, zlim=5, xlimlabel='$\gamma$', ylimlabel='$\gamma$')
+
+
+#########################################
+# Plotting Conditional Input Distribution ("Bow-tie plot")
+#########################################
+
+# top-right quadrant (positive x only)
+for beta in betas:
+    plotConditionalDensity(x1_cond, x2_cond, bivariatePareto_pdf(x1_full, x2_full, sigma1=1, sigma2=1, beta=beta), xlabel='$s_1$', ylabel='$s_2$', cmap='gray', fname='conditional_Pareto_pdf_beta'+str(beta)+fileFormat)
+
+# full bow-tie plot (taking absolute value of x)
+for beta in [1,2]:
+    plotConditionalDensity(x1_bowtie, x2_bowtie, bivariatePareto_pdf(x1_fullbowtie, x2_fullbowtie, sigma1=1, sigma2=1, beta=beta, absoluteValue=True), xlabel='$s_1$', ylabel='$s_2$', cmap='gray', fname='conditional_Pareto_pdf_beta'+str(beta)+'_fullBowtie'+fileFormat)
