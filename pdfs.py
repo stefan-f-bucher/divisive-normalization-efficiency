@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Nov  9 12:54:55 2020
 This file implements the pdfs of different input/output distributions for use in plotting.
 @author: Stefan Bucher (web@stefan-bucher.ch)
 """
@@ -11,15 +10,16 @@ import math
 
 # all functions below take meshgrids as input and output
 
-# Divisive Normalization Transformation (eq. 1); bivariate special case
+# Divisive Normalization Transformation; bivariate special case
 def r_i(x_i, x_j, gamma, b, beta, lambda_i, lambda_j):
     return gamma * x_i**beta / (b**beta + lambda_i * x_i**beta + lambda_j * x_j**beta)
+
 
 ####################################
 # Input PDFs
 ####################################
 
-# pdf of bivariate Pareto distribution (eq. 5) with mu=0
+# pdf of bivariate Pareto distribution with mu=0
 def bivariatePareto_pdf(x1, x2, sigma1, sigma2, beta, absoluteValue=False):
     n = 2
     if absoluteValue:
@@ -35,7 +35,7 @@ def bivariatePareto_pdf(x1, x2, sigma1, sigma2, beta, absoluteValue=False):
     return pd.DataFrame(density, columns=x1[0,:], index=x2[:,0])
 
 
-# returns the input pdf associated with a given output pdf (Theorem 1, eq.3)
+# returns the input pdf associated with a given output pdf (Theorem)
 ## x1: 2-dimensionoal np.meshgrid
 ## x2: 2-dimensionoal np.meshgrid
 ## output_pdf: function returning a 2d DataFrame
@@ -54,6 +54,7 @@ def input_pdf_from_output_pdf(x1, x2, gamma, b, beta, lambda1, lambda2, output_p
     #normalizingConstant = np.sum(density(domain_x,domain_y))*dx*dy
     #print('inputPDF: '+str(normalizingConstant)) # =1
     return pd.DataFrame(density(x1,x2) , columns=x1[0,:], index=x2[:,0])
+
 
 #############################################
 # Output PDFs
@@ -78,8 +79,3 @@ def bivariateTruncatedExponential_pdf(y1, y2, gamma, kappa=1):
     
     density = np.exp(-kappa*y1-kappa*y2)*(y1+y2<gamma)
     return  pd.DataFrame(density/normalizingConstant , columns=y1[0,:], index=y2[:,0])
-
-
-#def bivariate_t_pdf(x1,x2, alpha, beta): # isotropic bivariate t Distribution, cf. Lyu (Neural Computation 2011) equation 3.4
-#    d=2
-#    return ( alpha**beta * scipy.special.gamma(beta+d/2) ) / ( np.pi**(d/2) * scipy.special.gamma(beta) ) * (alpha + x1**2 + x2**2 )**(-beta-d/2)

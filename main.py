@@ -3,7 +3,6 @@
 """
 @author: Stefan Bucher (web@stefan-bucher.ch), 2021
 """
-
 import numpy as np
 import scipy.special
 import math
@@ -14,13 +13,13 @@ from matplotlib.widgets import Slider
 import matplotlib.ticker as ticker
 
 from pdfs import *
+from mixtureModel import randomParetoSample_mixtureModel
 from plotFunctions import *
 
 
-
-
-resolution = 0.01 
-lowres = 0.1
+nDraws =  100000 # sample size for histograms
+gridResolution = 0.01 
+lowGridResolution = 0.1
 betas = [ 1, 2, 3, 5]
 
 fileFormat = '.pdf' # png or jpg seem to give better results than pdf, eps, svg
@@ -28,14 +27,28 @@ cmap = 'binary' # colormap ('gray': white for high values; 'binary': black for h
 vmin = 0 # ensure that white in 'binary' color map corresponds to pdf=0.
 vmax = None # chosen automatically based on data
 
-# Mesh grids of different size for different purposes
-x1_full, x2_full = np.meshgrid(np.arange(0,100,resolution),np.arange(0,100,resolution))
-x1_divnorm, x2_divnorm = np.meshgrid(np.arange(0,3.01,resolution),np.arange(0,3.01,resolution))
-y1, y2 = np.meshgrid(np.arange(0,1.01,resolution),np.arange(0,1.01,resolution))
-x1_cond, x2_cond =  np.meshgrid(np.arange(0,10.01,resolution),np.arange(0,10.01,resolution)) # could do negative values for bow-tie plot but pdf is 0
 
-x1_bowtie, x2_bowtie =  np.meshgrid(np.arange(-10.11,10.11,lowres),np.arange(-10.11,10.11,lowres))
-x1_fullbowtie, x2_fullbowtie = np.meshgrid(np.arange(-100,100,lowres),np.arange(-100,100,lowres))
+##############################################
+# Plotting Histogram of a Random Sample
+##############################################
+for beta in betas:
+    S = randomParetoSample_mixtureModel(beta=beta, mu=0*np.array([1,1]), sigma=1*np.array([1,1]), size=nDraws)
+
+    plotJointHistogram(S, cmap=cmap, fname='jointHistogram_beta'+str(beta)+fileFormat)
+
+    plotConditionalHistogram(S, fname='conditionalHistogram_beta'+str(beta)+fileFormat)
+
+
+##############################################
+# Mesh grids of different size for different purposes
+##############################################
+x1_full, x2_full = np.meshgrid(np.arange(0,100,gridResolution),np.arange(0,100,gridResolution))
+x1_divnorm, x2_divnorm = np.meshgrid(np.arange(0,3.01,gridResolution),np.arange(0,3.01,gridResolution))
+y1, y2 = np.meshgrid(np.arange(0,1.01,gridResolution),np.arange(0,1.01,gridResolution))
+x1_cond, x2_cond =  np.meshgrid(np.arange(0,10.01,gridResolution),np.arange(0,10.01,gridResolution)) # could do negative values for bow-tie plot but pdf is 0
+
+x1_bowtie, x2_bowtie =  np.meshgrid(np.arange(-10.11,10.11,lowGridResolution),np.arange(-10.11,10.11,lowGridResolution))
+x1_fullbowtie, x2_fullbowtie = np.meshgrid(np.arange(-100,100,lowGridResolution),np.arange(-100,100,lowGridResolution))
 
 
 #########################################
@@ -43,10 +56,10 @@ x1_fullbowtie, x2_fullbowtie = np.meshgrid(np.arange(-100,100,lowres),np.arange(
 #########################################
 for beta in betas:
     if beta<=1:
-        x1_trunc, x2_trunc = np.meshgrid(np.arange(0,1.01,resolution),np.arange(0,1.01,resolution))
+        x1_trunc, x2_trunc = np.meshgrid(np.arange(0,1.01,gridResolution),np.arange(0,1.01,gridResolution))
         zlim = 3
     else:
-        x1_trunc, x2_trunc = np.meshgrid(np.arange(0,3.01,resolution),np.arange(0,3.01,resolution))
+        x1_trunc, x2_trunc = np.meshgrid(np.arange(0,3.01,gridResolution),np.arange(0,3.01,gridResolution))
         zlim = 1
 
     ## Pareto distribution

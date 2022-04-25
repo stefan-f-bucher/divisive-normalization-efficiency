@@ -4,13 +4,12 @@
 # Numerical proof-of-concept of the Proposition in the paper
 # according to which multivariate Pareto type III random variables
 # can be generated as gamma-weighted mixtures of independent Weibull random variables.
-# Draws a sample, plots its histogram, and compares the sample estimate of the moments with their theoretical predictions.
+# Draws a sample and compares the sample estimate of the moments with their theoretical predictions.
 @author: Stefan Bucher (web@stefan-bucher.ch)
 """
 
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+from scipy.special import gamma
 from mixtureModel import randomParetoSample_mixtureModel
 
 beta = 3 # shape parameter
@@ -18,26 +17,11 @@ mu = 0*np.array([1,1]) # vector of location parameters mu. also determines dimen
 sigma = 1*np.array([1,1]) # vector of scale parameters sigma
 nDraws =  10000000 # sample size (large in order to ensure convergence to theoretical values)
 
-
 ##############################################
-# Histogram of a Random Sample
+# Random Sample
 ##############################################
 
 S = randomParetoSample_mixtureModel(beta, mu, sigma, size=nDraws)
-
-# Joint histogram
-plt.figure(figsize=(10,10))
-plt.hist2d(S[:,0],S[:,1], bins=100, range=[[0, 5], [0, 5]])
-plt.show()
-
-# (Columnwise normalized) conditional histogram ('bow-tie plot')
-hist = pd.DataFrame(plt.hist2d(S[:,0],S[:,1], bins=100, range=[[0, 5], [0, 5]], density=True)[0])
-conditionalHist = hist.divide(hist.sum(axis=0), axis=1)
-conditionalHist = conditionalHist.divide(conditionalHist.max(axis=0)-conditionalHist.min(axis=0), axis=1)
-plt.figure(figsize=(10,10))
-plt.imshow(conditionalHist)
-plt.gca().invert_yaxis()
-plt.show()
 
 
 ##############################################

@@ -21,6 +21,40 @@ smallFig = (9*centimeter, 6*centimeter)
 mediumFig = (11*centimeter, 11*centimeter)
 largeFig = (18*centimeter, 22*centimeter)
 
+
+############################################
+# Joint histogram
+############################################
+def plotJointHistogram(sample, cmap='gray', fname=None):
+    plt.figure(figsize=mediumFig)
+    plt.hist2d(sample[:,0],sample[:,1], bins=100, range=[[0, 5], [0, 5]], cmap=cmap, rasterized=True)
+
+    if fname is not None:
+            plt.savefig('../figures/'+fname, bbox_inches='tight')
+    else:
+        plt.show()
+    plt.close('all')
+    return
+
+############################################
+# (Columnwise normalized) conditional histogram ('bow-tie plot')
+############################################
+def plotConditionalHistogram(sample, cmap='gray', fname=None):
+    hist = pd.DataFrame(plt.hist2d(sample[:,0],sample[:,1], bins=100, range=[[0, 5], [0, 5]], density=True)[0])
+    conditionalHist = hist.divide(hist.sum(axis=0), axis=1)
+    conditionalHist = conditionalHist.divide(conditionalHist.max(axis=0)-conditionalHist.min(axis=0), axis=1)
+
+    plt.figure(figsize=mediumFig)
+    plt.imshow(conditionalHist, cmap=cmap, rasterized=True)
+    plt.gca().invert_yaxis()
+
+    if fname is not None:
+            plt.savefig('../figures/'+fname, bbox_inches='tight')
+    else:
+        plt.show()
+    plt.close('all')
+    return
+
 ############################################
 # Conditional Density (for 'bow-tie' plots of Figure 2)
 ############################################
