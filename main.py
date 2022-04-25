@@ -16,10 +16,14 @@ import matplotlib.ticker as ticker
 from pdfs import *
 from plotFunctions import *
 
+
+
+
 resolution = 0.01 
 lowres = 0.1
 betas = [ 1, 2, 3, 5]
-fileFormat = '.png' #jpg or png seem to give better results than pdf, svg
+
+fileFormat = '.pdf' # png or jpg seem to give better results than pdf, eps, svg
 cmap = 'binary' # colormap ('gray': white for high values; 'binary': black for high values)
 vmin = 0 # ensure that white in 'binary' color map corresponds to pdf=0.
 vmax = None # chosen automatically based on data

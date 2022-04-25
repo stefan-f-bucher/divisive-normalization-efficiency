@@ -15,6 +15,11 @@ from  matplotlib import gridspec
 from matplotlib.widgets import Slider
 import matplotlib.ticker as ticker
 
+plt.rcParams['savefig.dpi'] = 900
+centimeter = 1/2.54  # centimeters in inches
+smallFig = (9*centimeter, 6*centimeter)
+mediumFig = (11*centimeter, 11*centimeter)
+largeFig = (18*centimeter, 22*centimeter)
 
 ############################################
 # Conditional Density (for 'bow-tie' plots of Figure 2)
@@ -34,9 +39,9 @@ def plotConditionalDensity(X, Y, density, xlabel=None, ylabel=None, x0label=0, y
     yDensityConditionalOnX = yDensityConditionalOnX.divide((yDensityConditionalOnX.max(axis=0) - yDensityConditionalOnX.min(axis=0)), axis=1)
     
     # Plot conditional distribution
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=mediumFig)
     yDensityConditionalOnX = yDensityConditionalOnX.loc[yDensityConditionalOnX.index<=int(np.max(Y)),yDensityConditionalOnX.columns<=int(np.max(X))]
-    sns.heatmap(yDensityConditionalOnX, square=True, cbar=False, cmap=cmap, ax=ax) # (white for high values)
+    sns.heatmap(yDensityConditionalOnX, square=True, cbar=False, cmap=cmap, ax=ax, rasterized=True) # (white for high values)
     
     # Labels and Co.
     ax.set_xlabel(xlabel, fontsize=18, rotation=0)
@@ -60,7 +65,7 @@ def plotConditionalDensity(X, Y, density, xlabel=None, ylabel=None, x0label=0, y
     ax.invert_yaxis()
     plt.subplots_adjust(left=0.02, top=0.98, bottom=0.12, right=0.88) # add a bit of space to the right
     if fname is not None:
-        plt.savefig('../figures/'+fname,dpi=720, bbox_inches='tight')
+        plt.savefig('../figures/'+fname, bbox_inches='tight')
         plt.close('all')
         
     return yDensityConditionalOnX 
@@ -74,7 +79,7 @@ def plotConditionalDensity(X, Y, density, xlabel=None, ylabel=None, x0label=0, y
 
 # plots joint density of X and Y along with its marginals
 def plotJointDensity(X, Y, density, xlabel, ylabel, x0label=0, xlimlabel=None, y0label=0, ylimlabel=None, cmap='gray', vmin=None, vmax=None, fname=None):
-    fig = plt.figure(figsize=(5,5))
+    fig = plt.figure(figsize=mediumFig)
     gs = gridspec.GridSpec(2, 2, width_ratios=[1,4], height_ratios=[1,4],figure=fig)
     gs.update(wspace=0.03, hspace=0.03)
     ax = plt.subplot(gs[1,1])
@@ -90,7 +95,7 @@ def plotJointDensity(X, Y, density, xlabel, ylabel, x0label=0, xlimlabel=None, y
     
     # Plot joint distribution
     jointProbability_trunc = jointProbability.loc[jointProbability.index<=int(np.max(Y)), jointProbability.columns<=int(np.max(X))] 
-    sns.heatmap(jointProbability_trunc, square=True, cbar=False, cmap=cmap, vmin=vmin, vmax=vmax, ax=ax, xticklabels=False, yticklabels=False)
+    sns.heatmap(jointProbability_trunc, square=True, cbar=False, cmap=cmap, vmin=vmin, vmax=vmax, ax=ax, xticklabels=False, yticklabels=False, rasterized=True)
 
 
 
@@ -134,7 +139,7 @@ def plotJointDensity(X, Y, density, xlabel, ylabel, x0label=0, xlimlabel=None, y
 
 
     if fname is not None:
-            plt.savefig('../figures/'+fname,dpi=720, bbox_inches='tight')
+            plt.savefig('../figures/'+fname, bbox_inches='tight')
     else:
         plt.show()
     plt.close('all')
@@ -153,13 +158,13 @@ def plotJointDensity(X, Y, density, xlabel, ylabel, x0label=0, xlimlabel=None, y
 # density will be plotted only over X,Y    
 def plot3D(X, Y, density, xlabel, ylabel, zlabel, fname=None, show_pdf=True, contourProjections=True, zlim=None, x0label=0, xlimlabel=None, y0label=0, ylimlabel=None, zlimlabel=None, elev=30, azim=28):
     density = np.array(density)
-    fig = plt.figure()
+    fig = plt.figure( figsize=mediumFig )
     ax = fig.gca(projection='3d')
     ax.grid(False)
     if show_pdf:
         surf = ax.plot_surface(X,Y,density[0:np.size(X,0),0:np.size(Y,1)],
                             color='grey', alpha=0.6,
-                            linewidth=1, antialiased=False,
+                            linewidth=5, antialiased=False,
                             #rstride=8, cstride=8,
                             rcount=50, ccount=50)
         #surf = ax.plot_wireframe(X,Y,density,rcount=25, ccount=25,color='grey',alpha=0.7)
@@ -217,7 +222,7 @@ def plot3D(X, Y, density, xlabel, ylabel, zlabel, fname=None, show_pdf=True, con
     ax.zaxis._axinfo['juggled'] = (1,2,0) #(0,2,1)
     
     if fname is not None:
-        plt.savefig('../figures/'+fname,dpi=720, bbox_inches='tight')
+        plt.savefig('../figures/'+fname, bbox_inches='tight')
         #plt.show()
         
     if show_pdf:    
