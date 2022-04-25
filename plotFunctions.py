@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Nov  9 12:58:10 2020
 Provides functions producing the plots for the paper.
 @author: Stefan Bucher (web@stefan-bucher.ch)
 """
@@ -22,12 +21,36 @@ mediumFig = (11*centimeter, 11*centimeter)
 largeFig = (18*centimeter, 22*centimeter)
 
 
+
 ############################################
 # Joint histogram
 ############################################
-def plotJointHistogram(sample, cmap='gray', fname=None):
+def plotJointHistogram(sample, trunc=5, xlabel=None, ylabel=None, x0label=0, y0label=0, xlimlabel=None, ylimlabel=None, cmap='gray', fname=None):
     plt.figure(figsize=mediumFig)
-    plt.hist2d(sample[:,0],sample[:,1], bins=100, range=[[0, 5], [0, 5]], cmap=cmap, rasterized=True)
+    plt.hist2d(sample[:,0],sample[:,1], bins=100, range=[[0, trunc], [0, trunc]], cmap=cmap, rasterized=True)
+
+    # Labels and Co.
+    ax = plt.gca()
+    ax.set_xlabel(xlabel, fontsize=18, rotation=0)
+    ax.set_xticks([0, trunc])
+    if xlimlabel is not None:
+        ax.set_xticklabels([x0label, xlimlabel])
+    if x0label != 0:
+        ax.set_xticklabels([x0label, x0label + '+' + str(int(trunc))])
+    for item in ax.get_xticklabels():
+        item.set_rotation(0)
+
+    ax.set_ylabel(ylabel, fontsize=18, rotation=0)
+    ax.yaxis.set_label_position("right")
+    ax.yaxis.tick_right()
+    ax.set_yticks([0, trunc])
+    if ylimlabel is not None:
+        ax.set_yticklabels([y0label, ylimlabel])
+    if y0label != 0:
+        ax.set_yticklabels([y0label, y0label + '+' + str(int(trunc))])
+    plt.setp(ax.yaxis.get_majorticklabels(), rotation=0,
+             verticalalignment="bottom")  # vertical alignment of y tick labels
+    ax.tick_params(axis='both', labelsize=18)
 
     if fname is not None:
             plt.savefig('../figures/'+fname, bbox_inches='tight')
@@ -36,17 +59,37 @@ def plotJointHistogram(sample, cmap='gray', fname=None):
     plt.close('all')
     return
 
+
+
 ############################################
 # (Columnwise normalized) conditional histogram ('bow-tie plot')
 ############################################
-def plotConditionalHistogram(sample, cmap='gray', fname=None):
-    hist = pd.DataFrame(plt.hist2d(sample[:,0],sample[:,1], bins=100, range=[[0, 5], [0, 5]], density=True)[0])
+def plotConditionalHistogram(sample, trunc=5, xlabel=None, ylabel=None, x0label=0, y0label=0, cmap='gray', fname=None):
+    hist = pd.DataFrame(plt.hist2d(sample[:,0],sample[:,1], bins=100, range=[[0, trunc], [0, trunc]], density=True)[0])
     conditionalHist = hist.divide(hist.sum(axis=0), axis=1)
     conditionalHist = conditionalHist.divide(conditionalHist.max(axis=0)-conditionalHist.min(axis=0), axis=1)
 
     plt.figure(figsize=mediumFig)
     plt.imshow(conditionalHist, cmap=cmap, rasterized=True)
-    plt.gca().invert_yaxis()
+
+    # Labels and Co.
+    ax = plt.gca()
+    ax.set_xlabel(xlabel, fontsize=18, rotation=0)
+    ax.set_ylabel(ylabel, fontsize=18, rotation=0)
+    ax.set_xticks([0, trunc])
+    ax.set_yticks([0, trunc])
+    if x0label == 0:
+        ax.set_xticklabels([int(trunc), int(trunc)])
+    else:
+        ax.set_xticklabels([x0label, x0label + '+' + str(int(trunc))])
+    for item in ax.get_xticklabels():
+        item.set_rotation(0)
+    if y0label == 0:
+        ax.set_yticklabels([int(trunc), int(trunc)])
+    else:
+        ax.set_yticklabels([y0label, y0label + '+' + str(int(trunc))])
+    ax.tick_params(axis='both', labelsize=18)
+    ax.invert_yaxis()
 
     if fname is not None:
             plt.savefig('../figures/'+fname, bbox_inches='tight')
@@ -54,6 +97,8 @@ def plotConditionalHistogram(sample, cmap='gray', fname=None):
         plt.show()
     plt.close('all')
     return
+
+
 
 ############################################
 # Conditional Density (for 'bow-tie' plots of Figure 2)
@@ -130,8 +175,6 @@ def plotJointDensity(X, Y, density, xlabel, ylabel, x0label=0, xlimlabel=None, y
     # Plot joint distribution
     jointProbability_trunc = jointProbability.loc[jointProbability.index<=int(np.max(Y)), jointProbability.columns<=int(np.max(X))] 
     sns.heatmap(jointProbability_trunc, square=True, cbar=False, cmap=cmap, vmin=vmin, vmax=vmax, ax=ax, xticklabels=False, yticklabels=False, rasterized=True)
-
-
 
     # Plot the marginal distributions
     axtop.fill_between(range(len(marginalProbability_x)), 0, marginalProbability_x, color='black') # axis of heatmap is in units of 'pixels'

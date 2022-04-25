@@ -34,9 +34,9 @@ vmax = None # chosen automatically based on data
 for beta in betas:
     S = randomParetoSample_mixtureModel(beta=beta, mu=0*np.array([1,1]), sigma=1*np.array([1,1]), size=nDraws)
 
-    plotJointHistogram(S, cmap=cmap, fname='jointHistogram_beta'+str(beta)+fileFormat)
+    plotJointHistogram(S, xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$', cmap=cmap, fname='jointHistogram_beta'+str(beta)+fileFormat)
 
-    plotConditionalHistogram(S, fname='conditionalHistogram_beta'+str(beta)+fileFormat)
+    plotConditionalHistogram(S, xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$', fname='conditionalHistogram_beta'+str(beta)+fileFormat)
 
 
 ##############################################
