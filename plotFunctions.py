@@ -27,12 +27,12 @@ largeFig = (18*centimeter, 22*centimeter)
 ############################################
 def plotJointHistogram(sample, trunc=5, xlabel=None, ylabel=None, x0label=0, y0label=0, xlimlabel=None, ylimlabel=None, cmap='gray', fname=None):
     plt.figure(figsize=mediumFig)
-    plt.hist2d(sample[:,0],sample[:,1], bins=100, range=[[0, trunc], [0, trunc]], cmap=cmap, rasterized=True)
+    h = plt.hist2d(sample[:,0], sample[:,1], bins=100, range=[[0, trunc], [0, trunc]], cmap=cmap, rasterized=True)
 
     # Labels and Co.
     ax = plt.gca()
     ax.set_xlabel(xlabel, fontsize=18, rotation=0)
-    ax.set_xticks([0, trunc])
+    ax.set_xticks([0, h[0].shape[0]])
     if xlimlabel is not None:
         ax.set_xticklabels([x0label, xlimlabel])
     if x0label != 0:
@@ -43,7 +43,7 @@ def plotJointHistogram(sample, trunc=5, xlabel=None, ylabel=None, x0label=0, y0l
     ax.set_ylabel(ylabel, fontsize=18, rotation=0)
     ax.yaxis.set_label_position("right")
     ax.yaxis.tick_right()
-    ax.set_yticks([0, trunc])
+    ax.set_yticks([0, h[0].shape[0]])
     if ylimlabel is not None:
         ax.set_yticklabels([y0label, ylimlabel])
     if y0label != 0:
@@ -64,8 +64,15 @@ def plotJointHistogram(sample, trunc=5, xlabel=None, ylabel=None, x0label=0, y0l
 ############################################
 # (Columnwise normalized) conditional histogram ('bow-tie plot')
 ############################################
-def plotConditionalHistogram(sample, trunc=5, xlabel=None, ylabel=None, x0label=0, y0label=0, cmap='gray', fname=None):
-    hist = pd.DataFrame(plt.hist2d(sample[:,0],sample[:,1], bins=100, range=[[0, trunc], [0, trunc]], density=True)[0])
+def plotConditionalHistogram(sample, trunc=5, xlabel=None, ylabel=None, x0label=0, y0label=0, cmap='gray', fullBowtie=False, fname=None):
+    if fullBowtie:
+        hist = pd.DataFrame(plt.hist2d(sample[:, 0], sample[:, 1], bins=200, range=[[-trunc, trunc], [-trunc, trunc]], density=True)[0])
+        x0label = str(int(-trunc))
+        y0label = str(int(-trunc))
+        xlimlabel = str(int(trunc))
+        ylimlabel = str(int(trunc))
+    else:
+        hist = pd.DataFrame(plt.hist2d(sample[:,0],sample[:,1], bins=100, range=[[0, trunc], [0, trunc]], density=True)[0])
     conditionalHist = hist.divide(hist.sum(axis=0), axis=1)
     conditionalHist = conditionalHist.divide(conditionalHist.max(axis=0)-conditionalHist.min(axis=0), axis=1)
 
@@ -76,18 +83,24 @@ def plotConditionalHistogram(sample, trunc=5, xlabel=None, ylabel=None, x0label=
     ax = plt.gca()
     ax.set_xlabel(xlabel, fontsize=18, rotation=0)
     ax.set_ylabel(ylabel, fontsize=18, rotation=0)
-    ax.set_xticks([0, trunc])
-    ax.set_yticks([0, trunc])
+    ax.set_xticks([0, hist[0].shape[0]])
+    ax.set_yticks([0, hist[0].shape[0]])
     if x0label == 0:
         ax.set_xticklabels([int(trunc), int(trunc)])
     else:
-        ax.set_xticklabels([x0label, x0label + '+' + str(int(trunc))])
+        if fullBowtie:
+            ax.set_xticklabels([x0label, xlimlabel])
+        else:
+            ax.set_xticklabels([x0label, x0label + '+' + str(int(trunc))])
     for item in ax.get_xticklabels():
         item.set_rotation(0)
     if y0label == 0:
         ax.set_yticklabels([int(trunc), int(trunc)])
     else:
-        ax.set_yticklabels([y0label, y0label + '+' + str(int(trunc))])
+        if fullBowtie:
+            ax.set_yticklabels([y0label, ylimlabel])
+        else:
+            ax.set_yticklabels([y0label, y0label + '+' + str(int(trunc))])
     ax.tick_params(axis='both', labelsize=18)
     ax.invert_yaxis()
 

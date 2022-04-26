@@ -20,7 +20,7 @@ from plotFunctions import *
 nDraws =  100000 # sample size for histograms
 gridResolution = 0.01 
 lowGridResolution = 0.1
-betas = [ 1, 2, 3, 5]
+betas = [ 0.5, 1, 2, 3, 5, 10]
 
 fileFormat = '.pdf' # png or jpg seem to give better results than pdf, eps, svg
 cmap = 'binary' # colormap ('gray': white for high values; 'binary': black for high values)
@@ -38,6 +38,13 @@ for beta in betas:
 
     plotConditionalHistogram(S, xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$', fname='conditionalHistogram_beta'+str(beta)+fileFormat)
 
+    # Full Bowtie Histogram
+    S_bowtie = np.vstack((np.array([1, 1])*randomParetoSample_mixtureModel(beta=beta, mu=0*np.array([1,1]), sigma=1*np.array([1,1]), size=int(nDraws/4)),
+                          np.array([1, -1]) * randomParetoSample_mixtureModel(beta=beta, mu=0 * np.array([1, 1]), sigma=1 * np.array([1, 1]), size=int(nDraws/4)),
+                          np.array([-1, 1]) * randomParetoSample_mixtureModel(beta=beta, mu=0 * np.array([1, 1]), sigma=1 * np.array([1, 1]), size=int(nDraws/4)),
+                          np.array([-1, -1]) * randomParetoSample_mixtureModel(beta=beta, mu=0 * np.array([1, 1]), sigma=1 * np.array([1, 1]), size=int(nDraws/4))
+                          ))
+    plotConditionalHistogram(S_bowtie, xlabel='$s_1$', ylabel='$s_2$', fullBowtie=True, fname='conditionalHistogram_beta'+str(beta)+'_fullBowtie'+fileFormat)
 
 ##############################################
 # Mesh grids of different size for different purposes
