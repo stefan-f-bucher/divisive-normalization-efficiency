@@ -20,7 +20,7 @@ from plotFunctions import *
 nDraws =  100000 # sample size for histograms
 gridResolution = 0.01 
 lowGridResolution = 0.1
-betas = [ 0.5, 1, 2, 3, 5, 10]
+betas = [ 0.5, 0.75, 1, 2, 3, 5, 10, 25]
 
 fileFormat = '.pdf' # png or jpg seem to give better results than pdf, eps, svg
 cmap = 'binary' # colormap ('gray': white for high values; 'binary': black for high values)
@@ -73,21 +73,21 @@ for beta in betas:
     plotJointDensity(x1_trunc, x2_trunc, bivariatePareto_pdf(x1_full, x2_full, sigma1=1, sigma2=1, beta=beta), xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$',cmap=cmap, vmin=vmin, vmax=vmax, fname='Pareto_pdf_beta'+str(beta)+fileFormat)
 
     plot3D(x2_trunc, x1_trunc, bivariatePareto_pdf(x2_full, x1_full, sigma1=1, sigma2=1, beta=beta), 
-           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='Pareto_pdf_beta'+str(beta)+'_3D'+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
+           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='3D_Pareto_pdf_beta'+str(beta)+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
     
     ## Input under constant costs (just as a sanity check - should be identical to Pareto_pdf)
     plotJointDensity(x1_trunc, x2_trunc, input_pdf_from_output_pdf(x1_full, x2_full, gamma=1, b=1, beta=beta, lambda1=1, lambda2=1, output_pdf=bivariateUniform_pdf), 
            xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$',cmap=cmap, vmin=vmin, vmax=vmax, fname='input_pdf_constantCost_beta'+str(beta)+fileFormat)
 
     plot3D(x2_trunc, x1_trunc, input_pdf_from_output_pdf(x2_full, x1_full, gamma=1, b=1, beta=beta, lambda1=1, lambda2=1, output_pdf=bivariateUniform_pdf), 
-           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='input_pdf_constantCost_beta'+str(beta)+'_3D'+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
+           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='3D_input_pdf_constantCost_beta'+str(beta)+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
     
     ## Input under linear costs
     plotJointDensity(x1_trunc, x2_trunc, input_pdf_from_output_pdf(x1_full, x2_full, gamma=1, b=1, beta=beta, lambda1=1, lambda2=1, output_pdf=bivariateTruncatedExponential_pdf),
            xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$',cmap=cmap, vmin=vmin, vmax=vmax, fname='input_pdf_linearCost_beta'+str(beta)+fileFormat)
     
     plot3D(x2_trunc, x1_trunc, input_pdf_from_output_pdf(x2_full, x1_full, gamma=1, b=1, beta=beta, lambda1=1, lambda2=1, output_pdf=bivariateTruncatedExponential_pdf), 
-           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='input_pdf_linearCost_beta'+str(beta)+'_3D'+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
+           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='3D_input_pdf_linearCost_beta'+str(beta)+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
 
 
 #########################################
@@ -107,13 +107,13 @@ for beta in betas:
 plotJointDensity(y1, y2, bivariateUniform_pdf(y1, y2, gamma=1), xlabel='$y_1$', ylabel='$y_2$', xlimlabel='$\gamma$', ylimlabel='$\gamma$',cmap=cmap, vmin=vmin, vmax=vmax, fname='truncatedUniform_pdf'+fileFormat)
     
 plot3D(y2, y1, bivariateUniform_pdf(y2, y1, gamma=1),
-       xlabel='$y_2$', ylabel='$y_1$',zlabel=None, fname='truncatedUniform_pdf'+'_3D'+fileFormat, show_pdf=False, contourProjections=True, zlim=5, xlimlabel='$\gamma$', ylimlabel='$\gamma$')
+       xlabel='$y_2$', ylabel='$y_1$',zlabel=None, fname='3D_truncatedUniform_pdf'+fileFormat, show_pdf=False, contourProjections=True, zlim=5, xlimlabel='$\gamma$', ylimlabel='$\gamma$')
 
 ## Truncated Exponential
 plotJointDensity(y1, y2, bivariateTruncatedExponential_pdf(y1, y2, gamma=1), xlabel='$y_1$', ylabel='$y_2$', xlimlabel='$\gamma$', ylimlabel='$\gamma$',cmap=cmap, vmin=vmin, vmax=vmax, fname='truncatedExponential_pdf'+fileFormat)
 
 plot3D(y2, y1, bivariateTruncatedExponential_pdf(y2,y1,gamma=1), 
-       xlabel='$y_2$', ylabel='$y_1$',zlabel=None, fname='truncatedExponential_pdf'+'_3D'+fileFormat, show_pdf=False, contourProjections=True, zlim=5, xlimlabel='$\gamma$', ylimlabel='$\gamma$')
+       xlabel='$y_2$', ylabel='$y_1$',zlabel=None, fname='3D_truncatedExponential_pdf'+fileFormat, show_pdf=False, contourProjections=True, zlim=5, xlimlabel='$\gamma$', ylimlabel='$\gamma$')
 
 
 #########################################
@@ -125,5 +125,5 @@ for beta in betas:
     plotConditionalDensity(x1_cond, x2_cond, bivariatePareto_pdf(x1_full, x2_full, sigma1=1, sigma2=1, beta=beta), xlabel='$s_1$', ylabel='$s_2$', cmap='gray', fname='conditional_Pareto_pdf_beta'+str(beta)+fileFormat)
 
 # full bow-tie plot (taking absolute value of x)
-for beta in [1,2]:
+for beta in betas: #[1,2]:
     plotConditionalDensity(x1_bowtie, x2_bowtie, bivariatePareto_pdf(x1_fullbowtie, x2_fullbowtie, sigma1=1, sigma2=1, beta=beta, absoluteValue=True), xlabel='$s_1$', ylabel='$s_2$', cmap='gray', fname='conditional_Pareto_pdf_beta'+str(beta)+'_fullBowtie'+fileFormat)

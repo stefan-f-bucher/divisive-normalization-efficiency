@@ -32,7 +32,7 @@ def plotJointHistogram(sample, trunc=5, xlabel=None, ylabel=None, x0label=0, y0l
     # Labels and Co.
     ax = plt.gca()
     ax.set_xlabel(xlabel, fontsize=18, rotation=0)
-    ax.set_xticks([0, h[0].shape[0]])
+    ax.set_xticks([0, trunc])
     if xlimlabel is not None:
         ax.set_xticklabels([x0label, xlimlabel])
     if x0label != 0:
@@ -41,9 +41,10 @@ def plotJointHistogram(sample, trunc=5, xlabel=None, ylabel=None, x0label=0, y0l
         item.set_rotation(0)
 
     ax.set_ylabel(ylabel, fontsize=18, rotation=0)
-    ax.yaxis.set_label_position("right")
-    ax.yaxis.tick_right()
-    ax.set_yticks([0, h[0].shape[0]])
+    #ax.yaxis.set_label_position("right")
+    #ax.yaxis.tick_right()
+    ax.invert_yaxis()
+    ax.set_yticks([0, trunc])
     if ylimlabel is not None:
         ax.set_yticklabels([y0label, ylimlabel])
     if y0label != 0:
@@ -75,6 +76,7 @@ def plotConditionalHistogram(sample, trunc=5, xlabel=None, ylabel=None, x0label=
         hist = pd.DataFrame(plt.hist2d(sample[:,0],sample[:,1], bins=100, range=[[0, trunc], [0, trunc]], density=True)[0])
     conditionalHist = hist.divide(hist.sum(axis=0), axis=1)
     conditionalHist = conditionalHist.divide(conditionalHist.max(axis=0)-conditionalHist.min(axis=0), axis=1)
+    conditionalHist = np.where(np.isnan(conditionalHist), 0, conditionalHist)
 
     plt.figure(figsize=mediumFig)
     plt.imshow(conditionalHist, cmap=cmap, rasterized=True)
