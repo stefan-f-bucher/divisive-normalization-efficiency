@@ -6,6 +6,7 @@
 import numpy as np
 import scipy.special
 import math
+import string
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 from matplotlib import cm
@@ -27,6 +28,11 @@ cmap = 'binary' # colormap ('gray': white for high values; 'binary': black for h
 vmin = 0 # ensure that white in 'binary' color map corresponds to pdf=0.
 vmax = None # chosen automatically based on data
 
+def trunc_joint(beta):
+    return 3 if (beta > 1) else 1
+
+def trunc_cond(beta):
+    return 10 if (beta > 1) else 10
 
 ##############################################
 # Plotting Histogram of a Random Sample
@@ -34,17 +40,17 @@ vmax = None # chosen automatically based on data
 for beta in betas:
     S = randomParetoSample_mixtureModel(beta=beta, mu=0*np.array([1,1]), sigma=1*np.array([1,1]), size=nDraws)
 
-    plotJointHistogram(S, xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$', cmap=cmap, fname='jointHistogram_beta'+str(beta)+fileFormat)
+    plotJointHistogram(S, trunc=trunc_joint(beta), xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$', cmap=cmap, fname='jointHistogram_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
 
-    plotConditionalHistogram(S, xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$', fname='conditionalHistogram_beta'+str(beta)+fileFormat)
+    plotConditionalHistogram(S, trunc=trunc_cond(beta), xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$', fname='conditionalHistogram_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
 
     # Full Bowtie Histogram
-    S_bowtie = np.vstack((np.array([1, 1])*randomParetoSample_mixtureModel(beta=beta, mu=0*np.array([1,1]), sigma=1*np.array([1,1]), size=int(nDraws/4)),
-                          np.array([1, -1]) * randomParetoSample_mixtureModel(beta=beta, mu=0 * np.array([1, 1]), sigma=1 * np.array([1, 1]), size=int(nDraws/4)),
-                          np.array([-1, 1]) * randomParetoSample_mixtureModel(beta=beta, mu=0 * np.array([1, 1]), sigma=1 * np.array([1, 1]), size=int(nDraws/4)),
-                          np.array([-1, -1]) * randomParetoSample_mixtureModel(beta=beta, mu=0 * np.array([1, 1]), sigma=1 * np.array([1, 1]), size=int(nDraws/4))
+    S_bowtie = np.vstack((np.array([1, 1])*randomParetoSample_mixtureModel(beta=beta, mu=0*np.array([1,1]), sigma=1*np.array([1,1]), size=int(nDraws)),
+                          np.array([1, -1]) * randomParetoSample_mixtureModel(beta=beta, mu=0 * np.array([1, 1]), sigma=1 * np.array([1, 1]), size=int(nDraws)),
+                          np.array([-1, 1]) * randomParetoSample_mixtureModel(beta=beta, mu=0 * np.array([1, 1]), sigma=1 * np.array([1, 1]), size=int(nDraws)),
+                          np.array([-1, -1]) * randomParetoSample_mixtureModel(beta=beta, mu=0 * np.array([1, 1]), sigma=1 * np.array([1, 1]), size=int(nDraws))
                           ))
-    plotConditionalHistogram(S_bowtie, xlabel='$s_1$', ylabel='$s_2$', fullBowtie=True, fname='conditionalHistogram_beta'+str(beta)+'_fullBowtie'+fileFormat)
+    plotConditionalHistogram(S_bowtie, trunc=trunc_cond(beta), xlabel='$s_1$', ylabel='$s_2$', fullBowtie=True, fname='conditionalHistogram_fullBowtie_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
 
 ##############################################
 # Mesh grids of different size for different purposes
@@ -52,9 +58,9 @@ for beta in betas:
 x1_full, x2_full = np.meshgrid(np.arange(0,100,gridResolution),np.arange(0,100,gridResolution))
 x1_divnorm, x2_divnorm = np.meshgrid(np.arange(0,3.01,gridResolution),np.arange(0,3.01,gridResolution))
 y1, y2 = np.meshgrid(np.arange(0,1.01,gridResolution),np.arange(0,1.01,gridResolution))
-x1_cond, x2_cond =  np.meshgrid(np.arange(0,10.01,gridResolution),np.arange(0,10.01,gridResolution)) # could do negative values for bow-tie plot but pdf is 0
+x1_cond, x2_cond =  np.meshgrid(np.arange(0,trunc_cond(beta)+0.01,gridResolution),np.arange(0,trunc_cond(beta)+0.01,gridResolution)) # could do negative values for bow-tie plot but pdf is 0
 
-x1_bowtie, x2_bowtie =  np.meshgrid(np.arange(-10.11,10.11,lowGridResolution),np.arange(-10.11,10.11,lowGridResolution))
+x1_bowtie, x2_bowtie =  np.meshgrid(np.arange(-trunc_cond(beta)+0.11,trunc_cond(beta)+0.11,lowGridResolution),np.arange(-trunc_cond(beta)+0.11,trunc_cond(beta)+0.11,lowGridResolution))
 x1_fullbowtie, x2_fullbowtie = np.meshgrid(np.arange(-100,100,lowGridResolution),np.arange(-100,100,lowGridResolution))
 
 
@@ -63,31 +69,31 @@ x1_fullbowtie, x2_fullbowtie = np.meshgrid(np.arange(-100,100,lowGridResolution)
 #########################################
 for beta in betas:
     if beta<=1:
-        x1_trunc, x2_trunc = np.meshgrid(np.arange(0,1.01,gridResolution),np.arange(0,1.01,gridResolution))
         zlim = 3
     else:
-        x1_trunc, x2_trunc = np.meshgrid(np.arange(0,3.01,gridResolution),np.arange(0,3.01,gridResolution))
         zlim = 1
 
+    x1_trunc, x2_trunc = np.meshgrid(np.arange(0, trunc_joint(beta) + 0.01, gridResolution), np.arange(0, trunc_joint(beta) + 0.01, gridResolution))
+
     ## Pareto distribution
-    plotJointDensity(x1_trunc, x2_trunc, bivariatePareto_pdf(x1_full, x2_full, sigma1=1, sigma2=1, beta=beta), xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$',cmap=cmap, vmin=vmin, vmax=vmax, fname='Pareto_pdf_beta'+str(beta)+fileFormat)
+    plotJointDensity(x1_trunc, x2_trunc, bivariatePareto_pdf(x1_full, x2_full, sigma1=1, sigma2=1, beta=beta), xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$',cmap=cmap, vmin=vmin, vmax=vmax, fname='Pareto_pdf_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
 
     plot3D(x2_trunc, x1_trunc, bivariatePareto_pdf(x2_full, x1_full, sigma1=1, sigma2=1, beta=beta), 
-           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='3D_Pareto_pdf_beta'+str(beta)+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
+           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='3D_Pareto_pdf_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
     
     ## Input under constant costs (just as a sanity check - should be identical to Pareto_pdf)
     plotJointDensity(x1_trunc, x2_trunc, input_pdf_from_output_pdf(x1_full, x2_full, gamma=1, b=1, beta=beta, lambda1=1, lambda2=1, output_pdf=bivariateUniform_pdf), 
-           xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$',cmap=cmap, vmin=vmin, vmax=vmax, fname='input_pdf_constantCost_beta'+str(beta)+fileFormat)
+           xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$',cmap=cmap, vmin=vmin, vmax=vmax, fname='input_pdf_constantCost_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
 
     plot3D(x2_trunc, x1_trunc, input_pdf_from_output_pdf(x2_full, x1_full, gamma=1, b=1, beta=beta, lambda1=1, lambda2=1, output_pdf=bivariateUniform_pdf), 
-           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='3D_input_pdf_constantCost_beta'+str(beta)+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
+           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='3D_input_pdf_constantCost_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
     
     ## Input under linear costs
     plotJointDensity(x1_trunc, x2_trunc, input_pdf_from_output_pdf(x1_full, x2_full, gamma=1, b=1, beta=beta, lambda1=1, lambda2=1, output_pdf=bivariateTruncatedExponential_pdf),
-           xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$',cmap=cmap, vmin=vmin, vmax=vmax, fname='input_pdf_linearCost_beta'+str(beta)+fileFormat)
+           xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$',cmap=cmap, vmin=vmin, vmax=vmax, fname='input_pdf_linearCost_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
     
     plot3D(x2_trunc, x1_trunc, input_pdf_from_output_pdf(x2_full, x1_full, gamma=1, b=1, beta=beta, lambda1=1, lambda2=1, output_pdf=bivariateTruncatedExponential_pdf), 
-           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='3D_input_pdf_linearCost_beta'+str(beta)+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
+           xlabel='$s_2$', ylabel='$s_1$', x0label='$\mu_2$', y0label='$\mu_1$',  zlabel=None, fname='3D_input_pdf_linearCost_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat, show_pdf=False, contourProjections=True, zlim=zlim)
 
 
 #########################################
@@ -95,7 +101,7 @@ for beta in betas:
 #########################################
 for beta in betas:
     plot3D(x2_divnorm, x1_divnorm, r_i(x_i=x1_divnorm, x_j=x2_divnorm, gamma=1, b=1, beta=beta, lambda_i=1, lambda_j=1),
-           xlabel='$x_j$', ylabel='$x_i$', zlabel='$r_i(x_i,x_j)$', fname='divNorm_fnct_beta' + str(beta) + fileFormat,
+           xlabel='$x_j$', ylabel='$x_i$', zlabel='$r_i(x_i,x_j)$', fname='divNorm_fnct_alpha' + str(beta).translate(str.maketrans('', '', string.punctuation)) + fileFormat,
            contourProjections=False, zlim=1, zlimlabel='$\gamma$', elev=22, azim=13)
 
 
@@ -122,8 +128,8 @@ plot3D(y2, y1, bivariateTruncatedExponential_pdf(y2,y1,gamma=1),
 
 # top-right quadrant (positive x only)
 for beta in betas:
-    plotConditionalDensity(x1_cond, x2_cond, bivariatePareto_pdf(x1_full, x2_full, sigma1=1, sigma2=1, beta=beta), xlabel='$s_1$', ylabel='$s_2$', cmap='gray', fname='conditional_Pareto_pdf_beta'+str(beta)+fileFormat)
+    plotConditionalDensity(x1_cond, x2_cond, bivariatePareto_pdf(x1_full, x2_full, sigma1=1, sigma2=1, beta=beta), xlabel='$s_1$', ylabel='$s_2$', cmap='gray', fname='conditional_Pareto_pdf_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
 
 # full bow-tie plot (taking absolute value of x)
 for beta in betas: #[1,2]:
-    plotConditionalDensity(x1_bowtie, x2_bowtie, bivariatePareto_pdf(x1_fullbowtie, x2_fullbowtie, sigma1=1, sigma2=1, beta=beta, absoluteValue=True), xlabel='$s_1$', ylabel='$s_2$', cmap='gray', fname='conditional_Pareto_pdf_beta'+str(beta)+'_fullBowtie'+fileFormat)
+    plotConditionalDensity(x1_bowtie, x2_bowtie, bivariatePareto_pdf(x1_fullbowtie, x2_fullbowtie, sigma1=1, sigma2=1, beta=beta, absoluteValue=True), xlabel='$s_1$', ylabel='$s_2$', cmap='gray', fname='conditional_Pareto_pdf_fullBowtie_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
