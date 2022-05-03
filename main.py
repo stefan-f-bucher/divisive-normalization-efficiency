@@ -21,7 +21,7 @@ from plotFunctions import *
 nDraws =  100000 # sample size for histograms
 gridResolution = 0.01 
 lowGridResolution = 0.1
-betas = [ 0.5, 0.75, 1, 2, 3, 5, 10, 25]
+betas = [ 0.5, 0.75, 1, 2, 3, 5, 10, 20]
 
 fileFormat = '.pdf' # png or jpg seem to give better results than pdf, eps, svg
 cmap = 'binary' # colormap ('gray': white for high values; 'binary': black for high values)
@@ -32,7 +32,10 @@ def trunc_joint(beta):
     return 3 if (beta > 1) else 1
 
 def trunc_cond(beta):
-    return 10 if (beta > 1) else 10
+    return 10 if (beta >= 1) else 3
+
+def trunc_condhist(beta):
+    return 10 if (beta < 5) else 3
 
 ##############################################
 # Plotting Histogram of a Random Sample
@@ -42,7 +45,7 @@ for beta in betas:
 
     plotJointHistogram(S, trunc=trunc_joint(beta), xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$', cmap=cmap, fname='jointHistogram_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
 
-    plotConditionalHistogram(S, trunc=trunc_cond(beta), xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$', fname='conditionalHistogram_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
+    plotConditionalHistogram(S, trunc=trunc_condhist(beta), xlabel='$s_1$', ylabel='$s_2$', x0label='$\mu_1$', y0label='$\mu_2$', fname='conditionalHistogram_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
 
     # Full Bowtie Histogram
     S_bowtie = np.vstack((np.array([1, 1])*randomParetoSample_mixtureModel(beta=beta, mu=0*np.array([1,1]), sigma=1*np.array([1,1]), size=int(nDraws)),
@@ -50,7 +53,7 @@ for beta in betas:
                           np.array([-1, 1]) * randomParetoSample_mixtureModel(beta=beta, mu=0 * np.array([1, 1]), sigma=1 * np.array([1, 1]), size=int(nDraws)),
                           np.array([-1, -1]) * randomParetoSample_mixtureModel(beta=beta, mu=0 * np.array([1, 1]), sigma=1 * np.array([1, 1]), size=int(nDraws))
                           ))
-    plotConditionalHistogram(S_bowtie, trunc=trunc_cond(beta), xlabel='$s_1$', ylabel='$s_2$', fullBowtie=True, fname='conditionalHistogram_fullBowtie_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
+    plotConditionalHistogram(S_bowtie, trunc=trunc_condhist(beta), xlabel='$s_1$', ylabel='$s_2$', fullBowtie=True, fname='conditionalHistogram_fullBowtie_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
 
 ##############################################
 # Mesh grids of different size for different purposes
@@ -58,9 +61,6 @@ for beta in betas:
 x1_full, x2_full = np.meshgrid(np.arange(0,100,gridResolution),np.arange(0,100,gridResolution))
 x1_divnorm, x2_divnorm = np.meshgrid(np.arange(0,3.01,gridResolution),np.arange(0,3.01,gridResolution))
 y1, y2 = np.meshgrid(np.arange(0,1.01,gridResolution),np.arange(0,1.01,gridResolution))
-x1_cond, x2_cond =  np.meshgrid(np.arange(0,trunc_cond(beta)+0.01,gridResolution),np.arange(0,trunc_cond(beta)+0.01,gridResolution)) # could do negative values for bow-tie plot but pdf is 0
-
-x1_bowtie, x2_bowtie =  np.meshgrid(np.arange(-trunc_cond(beta)+0.11,trunc_cond(beta)+0.11,lowGridResolution),np.arange(-trunc_cond(beta)+0.11,trunc_cond(beta)+0.11,lowGridResolution))
 x1_fullbowtie, x2_fullbowtie = np.meshgrid(np.arange(-100,100,lowGridResolution),np.arange(-100,100,lowGridResolution))
 
 
@@ -128,8 +128,10 @@ plot3D(y2, y1, bivariateTruncatedExponential_pdf(y2,y1,gamma=1),
 
 # top-right quadrant (positive x only)
 for beta in betas:
+    x1_cond, x2_cond = np.meshgrid(np.arange(0, trunc_cond(beta) + 0.01, gridResolution), np.arange(0, trunc_cond(beta) + 0.01, gridResolution))  # could do negative values for bow-tie plot but pdf is 0
     plotConditionalDensity(x1_cond, x2_cond, bivariatePareto_pdf(x1_full, x2_full, sigma1=1, sigma2=1, beta=beta), xlabel='$s_1$', ylabel='$s_2$', cmap='gray', fname='conditional_Pareto_pdf_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
 
 # full bow-tie plot (taking absolute value of x)
 for beta in betas: #[1,2]:
+    x1_bowtie, x2_bowtie = np.meshgrid(np.arange(-(trunc_cond(beta) + 0.11), trunc_cond(beta) + 0.11, lowGridResolution), np.arange(-(trunc_cond(beta) + 0.11), trunc_cond(beta) + 0.11, lowGridResolution))
     plotConditionalDensity(x1_bowtie, x2_bowtie, bivariatePareto_pdf(x1_fullbowtie, x2_fullbowtie, sigma1=1, sigma2=1, beta=beta, absoluteValue=True), xlabel='$s_1$', ylabel='$s_2$', cmap='gray', fname='conditional_Pareto_pdf_fullBowtie_beta'+str(beta).translate(str.maketrans('', '', string.punctuation))+fileFormat)
