@@ -38,6 +38,26 @@ def trunc_condhist(beta):
     return 10 if (beta < 5) else 3
 
 ##############################################
+# Plotting Univariate Example
+##############################################
+x1d = np.arange(0,4.001,gridResolution)
+y1d = np.arange(0,1.001,gridResolution)
+
+# univariate Pareto pdf with mu=0 and sigma=1
+def univPareto_pdf(x, beta):
+    return beta * x**(beta-1) / (1+x**beta)**2
+
+def univDivNorm(x, alpha, gamma=1, b=1, lbda=1):
+    return gamma * x**alpha / (b**alpha + lbda * x**alpha)
+
+plotUnivariateDensity(X=x1d, density=univPareto_pdf(x1d, beta=1), xlabel='$s$', ylabel='$f_S(s)$', fname='univariateExample_input_beta1'+fileFormat)
+plotUnivariateDensity(X=x1d, density=univPareto_pdf(x1d, beta=2), xlabel='$s$', ylabel='$f_S(s)$', fname='univariateExample_input_beta2'+fileFormat)
+plotUnivariateDensity(X=x1d, density=univDivNorm(x1d, alpha=1), xlabel='$x=s-\mu$', ylabel='$y=r(x)$', ylimlabel='$\gamma/\lambda$', fname='univariateExample_DN_alpha1'+fileFormat)
+plotUnivariateDensity(X=x1d, density=univDivNorm(x1d, alpha=2), xlabel='$x=s-\mu$', ylabel='$y=r(x)$', ylimlabel='$\gamma/\lambda$', fname='univariateExample_DN_alpha2'+fileFormat)
+plotUnivariateDensity(X=y1d, density=0.5*np.ones(y1d.size), xlabel='$y$', ylabel='$f_Y(y)$', xlimlabel='$\gamma/\lambda$', ylimlabel='$2\lambda/\gamma$', fname='univariateExample_output'+fileFormat)
+
+
+##############################################
 # Plotting Histogram of a Random Sample
 ##############################################
 for beta in betas:

@@ -21,6 +21,32 @@ mediumFig = (11*centimeter, 11*centimeter)
 largeFig = (18*centimeter, 22*centimeter)
 
 
+############################################
+# Univariate Density
+############################################
+def plotUnivariateDensity(X, density, xlabel, ylabel, xlimlabel=None, ylimlabel=None, fname=None):
+    plt.figure(figsize=smallFig)
+    ax = plt.gca()
+    ax.plot(X, density, 'k')
+    ax.set_xlim([0,np.max(X)])
+    ax.set_ylim([0,1])
+    ax.set_xlabel(xlabel, fontsize=15, labelpad=-10)
+    ax.set_ylabel(ylabel, fontsize=15, labelpad=-15)
+    ax.set_xticks([0, np.max(X)])
+    ax.set_yticks([0, 1])
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
+    if xlimlabel is not None:
+        ax.set_xticklabels(['0', xlimlabel], fontsize=15)
+    if ylimlabel is not None:
+        ax.set_yticklabels(['0', ylimlabel], fontsize=15)
+    if fname is not None:
+        plt.savefig('../figures/' + fname, bbox_inches='tight')
+    else:
+        plt.show()
+    plt.close('all')
+    return
+
 
 ############################################
 # Joint histogram
