@@ -1,4 +1,4 @@
-% Computes filter responses (scalable pyramid) to  images from the van Hateren dataset using matlabPyrTools (https://github.com/LabForComputationalVision/matlabPyrTools)
+% Computes filter responses (steerable pyramid) to images from the van Hateren dataset using matlabPyrTools (https://github.com/LabForComputationalVision/matlabPyrTools)
 % and fits the Pareto model using Maximum Likelihood Estimation
 
 addpath(genpath(pwd));
@@ -23,25 +23,33 @@ for i=1:nImages
     datasigned = [band1, band2];
 
     % Bivariate Maximum Likelihood Estimation of Pareto model (with mu=0)
-    %[phat,pci] = mle(data(:), 'logpdf', @(x,sigma1,sigma2,beta) logLikelihood_Pareto(x,[0,0],[sigma1,sigma2],beta,2), 'Start', [ 1,1, 1], 'Options',statset( 'MaxIter',1e5)); 
+    lastwarn(''); % Clear last warning message
     [phat,pci] = mle(data(:), 'nloglf', @(params,data,cens,freq) -logLikelihood_Pareto(data,[0,0],[params(1),params(2)],params(3),2), 'Start', [1,1,1], 'Options',statset( 'MaxIter',1e6)); 
-
-    
-    parameterEstimates_Pareto(i,1) = 0; %mu1
-    parameterEstimates_Pareto(i,2) = 0; %mu2
-    parameterEstimates_Pareto(i,3) = phat(1); %sigma1
-    parameterEstimates_Pareto(i,4) = phat(2); %sigma2
-    parameterEstimates_Pareto(i,5) = phat(3); %beta
-    parameterEstimates_Pareto(i,6) = -logLikelihood_Pareto(data(:), [0,0], [phat(1),phat(2)], phat(3), 2); % negative log-likelihood
-    parameterEstimates_Pareto(i,7) = 2*3 + parameterEstimates_Pareto(i,6); % AIC = 2*nParams - 2*logLikelihood
+    [warnMsg, warnId] = lastwarn
+    if isempty(warnMsg) % only save if there was no warning regarding non-convergence of MLE
+        parameterEstimates_Pareto(i,1) = 0; %mu1
+        parameterEstimates_Pareto(i,2) = 0; %mu2
+        parameterEstimates_Pareto(i,3) = phat(1); %sigma1
+        parameterEstimates_Pareto(i,4) = phat(2); %sigma2
+        parameterEstimates_Pareto(i,5) = phat(3); %beta
+        parameterEstimates_Pareto(i,6) = -logLikelihood_Pareto(data(:), [0,0], [phat(1),phat(2)], phat(3), 2); % negative log-likelihood
+        parameterEstimates_Pareto(i,7) = 2*3 + parameterEstimates_Pareto(i,6); % AIC = 2*nParams - 2*logLikelihood
+    else
+        parameterEstimates_Pareto(i,:) = nan
+    end
     
     % For comparison: Bivariate-t model
+    lastwarn(''); % Clear last warning message
     [phat_mvt,pci_mvt] = mle(datasigned(:), 'nloglf', @(params,data,cens,freq) -logLikelihood_mvtdist(data,[1 params(1);params(1) 1],params(2), 2), 'Start', [0.5,1], 'Options',statset( 'MaxIter',1e6)); 
-    parameterEstimates_mvt(i,1) = phat_mvt(1); % correlation
-    parameterEstimates_mvt(i,2) = phat_mvt(2); % df
-    parameterEstimates_mvt(i,3) = -logLikelihood_mvtdist(datasigned(:),[1 phat_mvt(1);phat_mvt(1) 1],phat_mvt(2), 2); % negative log-likelihood
-    parameterEstimates_mvt(i,4) = 2*2 + parameterEstimates_mvt(i,3); % AIC = 2*nParams - 2*logLikelihood
-
+    [warnMsg, warnId] = lastwarn
+    if isempty(warnMsg) % only save if there was no warning regarding non-convergence of MLE
+        parameterEstimates_mvt(i,1) = phat_mvt(1); % correlation
+        parameterEstimates_mvt(i,2) = phat_mvt(2); % df
+        parameterEstimates_mvt(i,3) = -logLikelihood_mvtdist(datasigned(:),[1 phat_mvt(1);phat_mvt(1) 1],phat_mvt(2), 2); % negative log-likelihood
+        parameterEstimates_mvt(i,4) = 2*2 + parameterEstimates_mvt(i,3); % AIC = 2*nParams - 2*logLikelihood
+    else
+        parameterEstimates_mvt(i,:) = nan
+    end
 end
 
 csvwrite('../figures/parameterEstimates_Pareto.csv',[mean(parameterEstimates_Pareto,1); parameterEstimates_Pareto]); % first row contains mean values
@@ -67,7 +75,9 @@ xlabel('\beta');
 ylabel('number');
 export_fig('../figures/parameterHisto_ParetoBetas.pdf',gcf);
 
-%% Visualization of Histogram for an example image (last image of loop)
+
+
+%% Visualization of Histogram for an example image 
 
 exampleImage = load('./VanHateren/im6.mat').oim; 
 [c,b,examplehist_joint, examplehist_cond, exampleband1, exampleband2] = filterCorrelationHist(exampleImage, feature);
@@ -99,5 +109,3 @@ subplot(1,2,1);
 histogram(abs(exampleband1), 51);
 subplot(1,2,2);
 histogram(abs(exampleband2), 51);
-
-
