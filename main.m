@@ -5,7 +5,7 @@ addpath(genpath(pwd));
 clear;
 close all;
 
-nImages = 5;
+nImages = 2; %50;
 feature = 'orientation'; % Compare across 'orientation' or 'scale' 
 
 
@@ -48,77 +48,56 @@ csvwrite('../figures/parameterEstimates_Pareto.csv',[mean(parameterEstimates_Par
 csvwrite('../figures/parameterEstimates_mvt.csv',[mean(parameterEstimates_mvt,1); parameterEstimates_mvt]); % first row contains mean values
 
 figure;
+ylabel('num. of images');
 nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pareto','multivariate-t'},'separate'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
-set(gca,'LooseInset',get(gca,'TightInset'));
-saveas(gca,'../figures/parameterHisto_negllh.pdf');
-
+set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 10, 10], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
+xlabel('neg. llh');
+export_fig('../figures/parameterHisto_negllh.pdf',gcf);
 
 figure;
 nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
-set(gca,'LooseInset',get(gca,'TightInset'));
-saveas(gca,'../figures/parameterHisto_AIC.pdf');
+set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 10, 10], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
+xlabel('AIC');
+export_fig('../figures/parameterHisto_AIC.pdf',gcf);
 
-
+figure;
+set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 5, 5], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
+histogram(parameterEstimates_Pareto(:,5),0:0.05:2,'FaceColor','k','FaceAlpha',1); 
+xlabel('\beta');
+ylabel('number');
+export_fig('../figures/parameterHisto_ParetoBetas.pdf',gcf);
 
 %% Visualization of Histogram for an example image (last image of loop)
 
-figure;
-imagesc(image)
-colormap gray
+exampleImage = load('./VanHateren/im6.mat').oim; 
+[c,b,examplehist_joint, examplehist_cond, exampleband1, exampleband2] = filterCorrelationHist(exampleImage, feature);
+
 
 figure;
-imagesc(c,b,hist_cond); axis square
+set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 5, 5], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
+imagesc(exampleImage); axis off;
 colormap gray
+export_fig('../figures/exampleImage.pdf',gcf);
+
 
 figure;
-imagesc(c,b,log(hist_joint)); axis square
+set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 5, 5], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
+imagesc(c,b,examplehist_cond); axis square;
 colormap gray
+export_fig('../figures/examplehistogram_cond.pdf',gcf);
+
+
+figure;
+set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 5, 5], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
+imagesc(c,b,log(examplehist_joint)); axis square;
+colormap gray
+export_fig('../figures/examplehistogram_joint.pdf',gcf);
 
 
 figure;
 subplot(1,2,1);
-histogram(band1abs, 51);
+histogram(abs(exampleband1), 51);
 subplot(1,2,2);
-histogram(band2abs, 51);
+histogram(abs(exampleband2), 51);
 
 
-%% For Exploration Only: Fitting univariate model to marginal distributions of filter responses 
-
-[phat1d,pci1d] = mle(band1abs, 'logpdf', @(x,mu,sigma,beta) logLikelihood_Pareto(x, mu, sigma, beta, 1), 'Start', [0, 1, 1] );
-muhat = phat1d(1)
-sigmahat = phat1d(2)
-betahat = phat1d(3)
--logLikelihood_Pareto(band1abs, muhat, sigmahat, betahat, 1)
-
-[phat_muzero,pci_muzero] = mle(band1abs, 'logpdf', @(x,sigma,beta) logLikelihood_Pareto(x, 0, sigma, beta, 1), 'Start', [1, 1] );
-sigmahat_muzero = phat_muzero(1)
-betahat_muzero = phat_muzero(2)
--logLikelihood_Pareto(band1abs, 0, sigmahat_muzero, betahat_muzero, 1)
-
-fit_lognormal = fitdist(band1abs, 'lognormal');
-fit_weibull = fitdist(band1abs, 'weibull');
-fit_generalizedPareto = fitdist(band1abs, 'generalizedPareto');
-
-fit_lognormal.negloglik
-fit_weibull.negloglik
-fit_generalizedPareto.negloglik
-
-% Univariate Burr type XII distribution (https://www.mathworks.com/help/stats/burr-type-xii-distribution.html)
-% burr(alpha=sigma, c=beta, k=1) corresponds to our univariate Pareto(mu=0, sigma, beta)
-%fitdist(band1abs, 'burr'); diverging for some reason...
-%pareto = makedist('burr','k',1)
-%[phat,pci] = mle(band1abs,'Distribution','burr'); % order of phat: (alpha, c, k)
-
-
-%distributionFitter(band1abs)
-figure;
-histfit(band1abs,51,'lognormal');
-
-figure;
-H = histogram(band1abs,51,'Normalization','pdf'); hold on;
-xs = min(H.BinEdges):0.01:max(H.BinEdges);
-prob = zeros(length(xs));
-for xind=1:length(xs)
-    prob(xind) = Pareto_pdf(xs(xind),muhat, sigmahat, betahat, 1);
-end
-plot(xs, prob, 'k', 'LineWidth', 2)
