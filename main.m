@@ -68,16 +68,18 @@ end
 csvwrite('../figures/parameterEstimates_Pareto.csv',[mean(parameterEstimates_Pareto,1); parameterEstimates_Pareto]); % first row contains mean values
 csvwrite('../figures/parameterEstimates_mvt.csv',[mean(parameterEstimates_mvt,1); parameterEstimates_mvt]); % first row contains mean values
 
-% ignore the images where MLE did not converge for multivariate_t
+% ignore the images where MLE did not converge for one distribution
 parameterEstimates_Pareto( any(isnan(parameterEstimates_mvt),2), :) = nan;
+parameterEstimates_mvt( any(isnan(parameterEstimates_Pareto),2), :) = nan;
+
 
 figure;
-nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pareto','multivariate-t'},'separate','stderr','xlabel','neg. llh','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_negllh.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','neg. llh','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_negllh.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
 %set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 10, 10], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
 %export_fig('../figures/parameterHisto_negllh.pdf',gcf);
 
 figure;
-nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate','stderr','xlabel','AIC','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_AIC.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','AIC','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_AIC.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
 %set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 10, 10], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
 %export_fig('../figures/parameterHisto_AIC.pdf',gcf);
 
