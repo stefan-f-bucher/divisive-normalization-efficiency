@@ -5,9 +5,9 @@ addpath(genpath(pwd));
 clear;
 close all;
 
-nImages = 2; %50;
+nImages = 15; %50;
 feature = 'orientation'; % Compare across 'orientation' or 'scale' 
-
+homogeneousSigma = 1; % 1: Pareto model fitted with restriction sigma1=sigma2.
 
 %% MLE of biavariate Pareto- & t-distributions to the filter responses to images from the van Hateren dataset
 
@@ -22,57 +22,70 @@ for i=1:nImages
     data = [band1abs, band2abs];
     datasigned = [band1, band2];
 
-    % Bivariate Maximum Likelihood Estimation of Pareto model (with mu=0)
-    lastwarn(''); % Clear last warning message
-    [phat,pci] = mle(data(:), 'nloglf', @(params,data,cens,freq) -logLikelihood_Pareto(data,[0,0],[params(1),params(2)],params(3),2), 'Start', [1,1,1], 'Options',statset( 'MaxIter',1e6)); 
-    [warnMsg, warnId] = lastwarn
-    if isempty(warnMsg) % only save if there was no warning regarding non-convergence of MLE
-        parameterEstimates_Pareto(i,1) = 0; %mu1
-        parameterEstimates_Pareto(i,2) = 0; %mu2
-        parameterEstimates_Pareto(i,3) = phat(1); %sigma1
-        parameterEstimates_Pareto(i,4) = phat(2); %sigma2
-        parameterEstimates_Pareto(i,5) = phat(3); %beta
-        parameterEstimates_Pareto(i,6) = -logLikelihood_Pareto(data(:), [0,0], [phat(1),phat(2)], phat(3), 2); % negative log-likelihood
-        parameterEstimates_Pareto(i,7) = 2*3 + parameterEstimates_Pareto(i,6); % AIC = 2*nParams - 2*logLikelihood
-    else
-        parameterEstimates_Pareto(i,:) = nan
-    end
     
-    % For comparison: Bivariate-t model
+    % Bivariate Maximum Likelihood Estimation of multivariate-t model
     lastwarn(''); % Clear last warning message
     [phat_mvt,pci_mvt] = mle(datasigned(:), 'nloglf', @(params,data,cens,freq) -logLikelihood_mvtdist(data,[1 params(1);params(1) 1],params(2), 2), 'Start', [0.5,1], 'Options',statset( 'MaxIter',1e6)); 
-    [warnMsg, warnId] = lastwarn
+    [warnMsg, warnId] = lastwarn;
     if isempty(warnMsg) % only save if there was no warning regarding non-convergence of MLE
         parameterEstimates_mvt(i,1) = phat_mvt(1); % correlation
         parameterEstimates_mvt(i,2) = phat_mvt(2); % df
         parameterEstimates_mvt(i,3) = -logLikelihood_mvtdist(datasigned(:),[1 phat_mvt(1);phat_mvt(1) 1],phat_mvt(2), 2); % negative log-likelihood
         parameterEstimates_mvt(i,4) = 2*2 + parameterEstimates_mvt(i,3); % AIC = 2*nParams - 2*logLikelihood
+    else % MLE did not converge
+        parameterEstimates_mvt(i,:) = nan;
+        continue % skips MLE of Pareto where mvt did not converge
+    end
+    
+
+    % Bivariate Maximum Likelihood Estimation of Pareto model (with mu=0)
+    lastwarn(''); % Clear last warning message    
+    if homogeneousSigma
+        [phat,pci] = mle(data(:), 'nloglf', @(params,data,cens,freq) -logLikelihood_Pareto(data,[0,0],[params(1),params(1)],params(2),2), 'Start', [1,1], 'Options',statset( 'MaxIter',1e6)); 
     else
-        parameterEstimates_mvt(i,:) = nan
+        [phat,pci] = mle(data(:), 'nloglf', @(params,data,cens,freq) -logLikelihood_Pareto(data,[0,0],[params(1),params(2)],params(3),2), 'Start', [1,1,1], 'Options',statset( 'MaxIter',1e6)); 
+    end
+    [warnMsg, warnId] = lastwarn;
+    if isempty(warnMsg) % only save if there was no warning regarding non-convergence of MLE
+        parameterEstimates_Pareto(i,1) = 0; %mu1
+        parameterEstimates_Pareto(i,2) = 0; %mu2
+        if homogeneousSigma
+            parameterEstimates_Pareto(i,3) = phat(1); %sigma1
+            parameterEstimates_Pareto(i,4) = phat(1); %sigma2
+            parameterEstimates_Pareto(i,5) = phat(2); %beta
+        else
+            parameterEstimates_Pareto(i,3) = phat(1); %sigma1
+            parameterEstimates_Pareto(i,4) = phat(2); %sigma2
+            parameterEstimates_Pareto(i,5) = phat(3); %beta
+        end
+        parameterEstimates_Pareto(i,6) = -logLikelihood_Pareto(data(:), [0,0], [parameterEstimates_Pareto(i,3),parameterEstimates_Pareto(i,4)], parameterEstimates_Pareto(i,5), 2); % negative log-likelihood
+        parameterEstimates_Pareto(i,7) = 2*3 + parameterEstimates_Pareto(i,6); % AIC = 2*nParams - 2*logLikelihood
+    else
+        parameterEstimates_Pareto(i,:) = nan;
     end
 end
 
 csvwrite('../figures/parameterEstimates_Pareto.csv',[mean(parameterEstimates_Pareto,1); parameterEstimates_Pareto]); % first row contains mean values
 csvwrite('../figures/parameterEstimates_mvt.csv',[mean(parameterEstimates_mvt,1); parameterEstimates_mvt]); % first row contains mean values
 
-figure;
-ylabel('num. of images');
-nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pareto','multivariate-t'},'separate'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
-set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 10, 10], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
-xlabel('neg. llh');
-export_fig('../figures/parameterHisto_negllh.pdf',gcf);
+% ignore the images where MLE did not converge for multivariate_t
+parameterEstimates_Pareto( any(isnan(parameterEstimates_mvt),2), :) = nan;
 
 figure;
-nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
-set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 10, 10], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
-xlabel('AIC');
-export_fig('../figures/parameterHisto_AIC.pdf',gcf);
+nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pareto','multivariate-t'},'separate','stderr','xlabel','neg. llh','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_negllh.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+%set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 10, 10], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
+%export_fig('../figures/parameterHisto_negllh.pdf',gcf);
+
+figure;
+nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate','stderr','xlabel','AIC','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_AIC.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+%set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 10, 10], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
+%export_fig('../figures/parameterHisto_AIC.pdf',gcf);
 
 figure;
 set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 5, 5], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
 histogram(parameterEstimates_Pareto(:,5),0:0.05:2,'FaceColor','k','FaceAlpha',1); 
 xlabel('\beta');
-ylabel('number');
+ylabel('num. of images');
 export_fig('../figures/parameterHisto_ParetoBetas.pdf',gcf);
 
 
