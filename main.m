@@ -5,7 +5,7 @@ addpath(genpath(pwd));
 clear;
 close all;
 
-nImages = 15; %50;
+nImages = 25; %50;
 feature = 'orientation'; % Compare across 'orientation' or 'scale' 
 homogeneousSigma = 1; % 1: Pareto model fitted with restriction sigma1=sigma2.
 
@@ -34,7 +34,7 @@ for i=1:nImages
         parameterEstimates_mvt(i,4) = 2*2 + parameterEstimates_mvt(i,3); % AIC = 2*nParams - 2*logLikelihood
     else % MLE did not converge
         parameterEstimates_mvt(i,:) = nan;
-        continue % skips MLE of Pareto where mvt did not converge
+        %continue % skips MLE of Pareto where mvt did not converge
     end
     
 
@@ -68,27 +68,32 @@ end
 csvwrite('parameterEstimates_Pareto.csv',[mean(parameterEstimates_Pareto,1,'omitnan'); parameterEstimates_Pareto]); % first row contains mean values
 csvwrite('parameterEstimates_mvt.csv',[mean(parameterEstimates_mvt,1,'omitnan'); parameterEstimates_mvt]); % first row contains mean values
 
-% ignore the images where MLE did not converge for one distribution
-parameterEstimates_Pareto( any(isnan(parameterEstimates_mvt),2), :) = nan;
-parameterEstimates_mvt( any(isnan(parameterEstimates_Pareto),2), :) = nan;
-
-
-figure;
-nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','neg. llh','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_negllh.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
-%set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 10, 10], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
-%export_fig('../figures/parameterHisto_negllh.pdf',gcf);
-
-figure;
-nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','AIC','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_AIC.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
-%set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 10, 10], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
-%export_fig('../figures/parameterHisto_AIC.pdf',gcf);
-
 figure;
 set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 5, 5], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
 histogram(parameterEstimates_Pareto(:,5),1:0.01:2,'FaceColor','k','FaceAlpha',1); 
 xlabel('\beta');
 ylabel('num. of images');
 export_fig('../figures/parameterHisto_ParetoBetas.pdf',gcf);
+
+figure;
+nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','neg. llh','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_negllh.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+
+figure;
+nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','AIC','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_AIC.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+
+
+% ignore the images where MLE did not converge for one distribution
+parameterEstimates_Pareto( any(isnan(parameterEstimates_mvt),2), :) = nan;
+parameterEstimates_mvt( any(isnan(parameterEstimates_Pareto),2), :) = nan;
+
+figure;
+nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','neg. llh','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_negllh_onlymutual.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+
+figure;
+nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','AIC','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_AIC_onlymutual.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+
+
+
 
 
 
