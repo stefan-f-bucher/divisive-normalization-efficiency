@@ -65,8 +65,8 @@ for i=1:nImages
     end
 end
 
-csvwrite('../figures/parameterEstimates_Pareto.csv',[mean(parameterEstimates_Pareto,1); parameterEstimates_Pareto]); % first row contains mean values
-csvwrite('../figures/parameterEstimates_mvt.csv',[mean(parameterEstimates_mvt,1); parameterEstimates_mvt]); % first row contains mean values
+csvwrite('parameterEstimates_Pareto.csv',[mean(parameterEstimates_Pareto,1,'omitnan'); parameterEstimates_Pareto]); % first row contains mean values
+csvwrite('parameterEstimates_mvt.csv',[mean(parameterEstimates_mvt,1,'omitnan'); parameterEstimates_mvt]); % first row contains mean values
 
 % ignore the images where MLE did not converge for one distribution
 parameterEstimates_Pareto( any(isnan(parameterEstimates_mvt),2), :) = nan;
@@ -85,7 +85,7 @@ nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pa
 
 figure;
 set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 5, 5], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
-histogram(parameterEstimates_Pareto(:,5),0:0.05:2,'FaceColor','k','FaceAlpha',1); 
+histogram(parameterEstimates_Pareto(:,5),1:0.01:2,'FaceColor','k','FaceAlpha',1); 
 xlabel('\beta');
 ylabel('num. of images');
 export_fig('../figures/parameterHisto_ParetoBetas.pdf',gcf);
