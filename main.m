@@ -5,7 +5,7 @@ addpath(genpath(pwd));
 clear;
 close all;
 
-nImages = 25; %50;
+nImages = 50; %50;
 feature = 'orientation'; % Compare across 'orientation' or 'scale' 
 homogeneousSigma = 1; % 1: Pareto model fitted with restriction sigma1=sigma2.
 runEstimation = 1; % 0: does not run estimation, instead importing existing csv
@@ -99,6 +99,13 @@ nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pa
 
 figure;
 nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','AIC','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_AIC_onlymutual.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+
+fid = fopen('parameterEstimates_averageonlymutual.txt','wt');
+fprintf(fid,'Pareto:\n');
+fprintf(fid, '%s\n', mean(parameterEstimates_Pareto,1,'omitnan'));
+fprintf(fid,'t-Distribution:\n');
+fprintf(fid, '%s\n', mean(parameterEstimates_mvt,1,'omitnan'));
+fclose(fid);
 
 
 %% Visualization of Histogram for an example image 
