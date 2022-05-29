@@ -13,8 +13,8 @@ runEstimation = 1; % 0: does not run estimation, instead importing existing csv
 %% MLE of biavariate Pareto- & t-distributions to the filter responses to images from the van Hateren dataset
 
 if ~ runEstimation
-    parameterEstimates_Pareto = csvread('parameterEstimates_Pareto.csv',1,0)
-    parameterEstimates_mvt = csvread('parameterEstimates_mvt.csv',1,0)
+    parameterEstimates_Pareto = csvread('parameterEstimates_Pareto.csv',1,0);
+    parameterEstimates_mvt = csvread('parameterEstimates_mvt.csv',1,0);
 else
     parameterEstimates_Pareto = zeros(nImages,7);
     parameterEstimates_mvt = zeros(nImages,4);
@@ -78,16 +78,17 @@ end
 
 figure;
 set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 5, 5], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
-histogram(parameterEstimates_Pareto(:,5),1:0.01:2,'FaceColor','k','FaceAlpha',1); 
+histogram(parameterEstimates_Pareto(:,5),0.8:0.02:1.6,'FaceColor','k','FaceAlpha',1); 
 xlabel('\beta');
+xticks([0.8,1,1.5]);
 ylabel('num. of images');
 export_fig('../figures/parameterHisto_ParetoBetas.pdf',gcf);
 
 figure;
-nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','neg. llh','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_negllh.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pareto','multivariate-t'},'separate','samebins','stderror','xlabel','neg. llh','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_negllh.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
 
 figure;
-nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','AIC','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_AIC.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate','samebins','stderror','xlabel','AIC','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_AIC.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
 
 
 % ignore the images where MLE did not converge for one distribution
@@ -95,10 +96,10 @@ parameterEstimates_Pareto( any(isnan(parameterEstimates_mvt),2), :) = nan;
 parameterEstimates_mvt( any(isnan(parameterEstimates_Pareto),2), :) = nan;
 
 figure;
-nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','neg. llh','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_negllh_onlymutual.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pareto','multivariate-t'},'separate','samebins','stderror','xlabel','neg. llh','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_negllh_onlymutual.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
 
 figure;
-nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate','stderror','xlabel','AIC','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_AIC_onlymutual.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
+nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate','samebins','stderror','xlabel','AIC','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_AIC_onlymutual.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
 
 fid = fopen('parameterEstimates_averageonlymutual.txt','wt');
 fprintf(fid,'Pareto:\n');
