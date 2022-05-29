@@ -5,7 +5,7 @@ addpath(genpath(pwd));
 clear;
 close all;
 
-nImages = 50; %50;
+nImages = 100; %50;
 feature = 'orientation'; % Compare across 'orientation' or 'scale' 
 homogeneousSigma = 1; % 1: Pareto model fitted with restriction sigma1=sigma2.
 runEstimation = 1; % 0: does not run estimation, instead importing existing csv
