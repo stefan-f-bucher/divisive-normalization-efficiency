@@ -121,17 +121,22 @@ imagesc(exampleImage); axis off;
 colormap gray
 export_fig('../figures/exampleImage.pdf',gcf);
 
-
 figure;
 set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 5, 5], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
-imagesc(c,b,examplehist_cond); axis square;
+imagesc(c,b,examplehist_cond); 
+set(gca, 'YDir','normal');
+xticks([-3,0,3]);
+yticks([-3,0,3]);
 colormap gray
 export_fig('../figures/examplehistogram_cond.pdf',gcf);
 
 
 figure;
 set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 5, 5], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
-imagesc(c,b,log(examplehist_joint)); axis square;
+imagesc(c,b,log(examplehist_joint)); 
+set(gca, 'YDir','normal');
+xticks([-3,0,3]);
+yticks([-3,0,3]);
 colormap gray
 export_fig('../figures/examplehistogram_joint.pdf',gcf);
 
