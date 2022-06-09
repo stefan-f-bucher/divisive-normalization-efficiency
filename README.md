@@ -1,3 +1,6 @@
+Code for Bucher & Brandenburger (2022): Divisive normalization is an efficient code for multivariate Pareto-distributed environments.
+The empirical analysis uses the [van Hateren image data set](http://bethgelab.org/datasets/vanhateren/) and the Matlab package [matlabPyrTools](https://github.com/LabForComputationalVision/matlabPyrTools).
+
 Numerical Simulations (Python)
 * main.py produces figures
 * pdfs.py contains the expressions for the various probability densities
