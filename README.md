@@ -14,7 +14,7 @@ Install [matlabPyrTools](https://github.com/LabForComputationalVision/matlabPyrT
 
 ## Empirical Analysis of Filtered Image Statistics (Matlab)
 - main.m Maximum Likelihood Estimation of Pareto model using filter responses to images from the van Hateren dataset
-- Pareto_pdf.m contains the pdf of the Pareto distribution
-- logLikelihood_Pareto.m computes the log-likelihood under the Pareto distribution
-- logLikelihood_mvtdist.m computes the log-likelihood under the multivariate-t-distribution
-- filterCorrelationHist.m computes the filter responses of a steerable pyramid using function buildSCFpyr from matlabPyrTools
+  - Pareto_pdf.m contains the pdf of the Pareto distribution
+  - logLikelihood_Pareto.m computes the log-likelihood under the Pareto distribution
+  - logLikelihood_mvtdist.m computes the log-likelihood under the multivariate-t-distribution
+  - filterCorrelationHist.m computes the filter responses of a steerable pyramid using function [buildSCFpyr](https://github.com/LabForComputationalVision/matlabPyrTools/blob/master/buildSCFpyr.m) from [matlabPyrTools](https://github.com/LabForComputationalVision/matlabPyrTools)
