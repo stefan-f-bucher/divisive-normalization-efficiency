@@ -3,7 +3,7 @@
 The empirical analysis uses the [van Hateren image data set](http://bethgelab.org/datasets/vanhateren/) and the Matlab package [matlabPyrTools](https://github.com/LabForComputationalVision/matlabPyrTools).
 
 ## Getting Started
-Install [matlabPyrTools](https://github.com/LabForComputationalVision/matlabPyrTools) as well as [nhist](https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default) in the working directory. 
+Install [matlabPyrTools](https://github.com/LabForComputationalVision/matlabPyrTools), [nhist](https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default), and [export_fig](https://www.mathworks.com/matlabcentral/fileexchange/23629-export_fig) in the working directory. 
 
 ## Numerical Simulations (Python)
 - main.py produces figures
