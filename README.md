@@ -8,7 +8,7 @@ Install [matlabPyrTools](https://github.com/LabForComputationalVision/matlabPyrT
 ## Numerical Simulations (Python)
 - main.py produces figures
   - pdfs.py contains the expressions for the various probability densities
-  - mixtureModel.py generates a random sample of Pareto-distributed variables as a gamma-weighted mixture of independent Weibull random variables
+  - mixtureModel.py generates a random sample of Pareto-distributed random variables as a gamma-weighted mixture of independent Weibull random variables
   - plotFunctions.py contains plotting utility functions 
 - varianceFormulae_verification.py verifies the result on the Pareto distribution as a mixture model and uses it to generate random samples in order to verify that empirical moments coincide with theoretical ones
 
