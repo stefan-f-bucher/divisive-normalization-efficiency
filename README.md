@@ -6,7 +6,7 @@ The empirical analysis uses the [van Hateren image data set](http://bethgelab.or
 Install [matlabPyrTools](https://github.com/LabForComputationalVision/matlabPyrTools), [nhist](https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default), and [export_fig](https://www.mathworks.com/matlabcentral/fileexchange/23629-export_fig) in the working directory. 
 
 ## Numerical Simulations (Python)
-- main.py produces figures
+- [main.py](https://github.com/stefan-f-bucher/divisive-normalization-efficiency/blob/main/main.py) produces figures
   - pdfs.py contains the expressions for the various probability densities
   - mixtureModel.py generates a random sample of Pareto-distributed random variables as a gamma-weighted mixture of independent Weibull random variables
   - plotFunctions.py contains plotting utility functions 
