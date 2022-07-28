@@ -8,7 +8,7 @@ close all;
 nImages = 100; %50;
 feature = 'orientation'; % Compare across 'orientation' or 'scale' 
 homogeneousSigma = 1; % 1: Pareto model fitted with restriction sigma1=sigma2.
-runEstimation = 1; % 0: does not run estimation, instead importing existing csv
+runEstimation = 0; % 0: does not run estimation, instead importing existing csv
 
 %% MLE of biavariate Pareto- & t-distributions to the filter responses to images from the van Hateren dataset
 
@@ -77,6 +77,22 @@ end
 %% Plotting Goodness-of-Fit and Parameter Estimates
 
 figure;
+llhPareto = -parameterEstimates_Pareto(:,6);
+llhMvt =  -parameterEstimates_mvt(:,3);
+schist = scatterhist(llhPareto, llhMvt, 'Direction', 'out', 'Kernel', 'off', 'Color', 'k', 'Marker','.'); %'../figures/parameterHisto_negllh.eps'
+schist(2).Children.BinWidth = 20000;
+schist(3).Children.BinWidth = 20000;
+diagline = refline(1,0);
+diagline.Color = 'k';
+xlabel('llh Pareto');
+ylabel('llh multivariate-t');
+set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 7,7], 'PaperUnits', 'centimeters', 'PaperSize', [7,7], 'color','w');
+schist(2).YLim = [-0.0075e-05, 1.05e-05];
+schist(3).YLim = [-0.0075e-05, 1.05e-05];
+exportgraphics(gcf,'../figures/llhComparison.pdf');
+
+
+figure;
 set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 5, 5], 'PaperUnits', 'centimeters', 'PaperSize', [5, 5], 'color','w');
 histogram(parameterEstimates_Pareto(:,5),0.8:0.02:1.6,'FaceColor','k','FaceAlpha',1); 
 xlabel('\beta');
@@ -89,7 +105,6 @@ nhist({parameterEstimates_Pareto(:,6),parameterEstimates_mvt(:,3)},'legend',{'Pa
 
 figure;
 nhist({parameterEstimates_Pareto(:,7),parameterEstimates_mvt(:,4)},'legend',{'Pareto','multivariate-t'},'separate','samebins','stderror','xlabel','AIC','ylabel','num. of images','fsize',20,'eps','../figures/parameterHisto_AIC.eps'); % nhist: https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
-
 
 % ignore the images where MLE did not converge for one distribution
 parameterEstimates_Pareto( any(isnan(parameterEstimates_mvt),2), :) = nan;
