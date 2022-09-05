@@ -1,0 +1,6 @@
+[submodule "externalPackages/matlabPyrTools"]
+	path = externalPackages/matlabPyrTools
+	url = https://github.com/LabForComputationalVision/matlabPyrTools
+[submodule "externalPackages/export_fig"]
+	path = externalPackages/export_fig
+	url = https://github.com/altmany/export_fig
