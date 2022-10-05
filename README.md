@@ -1,4 +1,4 @@
-# Code for [Bucher & Brandenburger (2022): "Divisive normalization is an efficient code for multivariate Pareto-distributed environments"] (https://doi.org/10.1073/pnas.2120581119)
+# Code for [Bucher & Brandenburger (2022): "Divisive normalization is an efficient code for multivariate Pareto-distributed environments"](https://doi.org/10.1073/pnas.2120581119)
 
 The empirical analysis uses the [van Hateren image data set](http://pirsquared.org/research/vhatdb/full/) (described [here](http://bethgelab.org/datasets/vanhateren/)) and the Matlab package [matlabPyrTools](https://github.com/LabForComputationalVision/matlabPyrTools).
 
