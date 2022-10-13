@@ -1,6 +1,9 @@
 # Code for [Bucher & Brandenburger (2022): "Divisive normalization is an efficient code for multivariate Pareto-distributed environments"](https://doi.org/10.1073/pnas.2120581119)
 
+Figure 4 is available in better quality [here](https://doi.org/10.6084/m9.figshare.21330474.v1).
+
 The empirical analysis uses the [van Hateren image data set](http://pirsquared.org/research/vhatdb/full/) (described [here](http://bethgelab.org/datasets/vanhateren/)) and the Matlab package [matlabPyrTools](https://github.com/LabForComputationalVision/matlabPyrTools).
+
 
 ## Getting Started
 - Install [nhist](https://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default) in the working directory. [matlabPyrTools](https://github.com/LabForComputationalVision/matlabPyrTools) and [export_fig](https://www.mathworks.com/matlabcentral/fileexchange/23629-export_fig) should be included as submodules in externalPackages.
